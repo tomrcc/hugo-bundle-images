@@ -6,4 +6,13 @@
   <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
   {{- end }}
 </ul>
+
+{{- with site.GetPage "/blog/v1" }}
+<section class="box">
+  <h2>Component region: V1 cover off its own page</h2>
+  <div data-editable="component" data-component="bundle-cover" data-prop="@file[/content/{{ .File.Path }}]">
+    {{- partial "bundle-cover" .Params -}}
+  </div>
+</section>
+{{- end }}
 {{ end }}

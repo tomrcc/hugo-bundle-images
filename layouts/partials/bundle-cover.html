@@ -1,0 +1,10 @@
+{{- /* Context is the post's front matter (the region's data-prop value), not a page. */ -}}
+{{- $src := "" }}{{ $via := "none" }}
+{{- with index (where site.RegularPages "Title" .title) 0 }}
+  {{- with .Resources.Get $.cover }}{{ $src = .RelPermalink }}{{ $via = "resource" }}{{ end }}
+  {{- if and (not $src) $.cover }}{{ $src = printf "%s%s" .RelPermalink $.cover }}{{ $via = "computed" }}{{ end }}
+{{- end }}
+<div>
+  <img src="{{ $src }}" alt="{{ .title }} cover">
+  <p>Stored value <code>{{ .cover }}</code> · <code>src</code> <code>{{ $src }}</code> · via <code>{{ $via }}</code> · renderer <code>{{ if site.Params.ENV_CLIENT }}editor{{ else }}build{{ end }}</code></p>
+</div>

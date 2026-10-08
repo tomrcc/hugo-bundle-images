@@ -53,3 +53,28 @@ What the results mean:
 - V2 or V3 showing on the list page: that `paths` config fixes it everywhere.
 - A `src` still containing `[full_slug]`: `static` doesn't expand placeholders.
 - A stored value after choosing `other.jpg` that differs from the variant's format (`other.jpg` for V1/V2, `/other.jpg` for V3): CloudCannon writes a different form than this test assumes.
+
+## Component region variant
+
+Question: can a component region show and live-update a bundle image off its own page, where an image region can't?
+
+The home page shows V1's cover inside a component region (`bundle-cover` partial) bound to `@file[/content/blog/v1/index.md]`. There is no image region inside it. The partial looks up the post by title, then tries `.Resources.Get` and falls back to the post's URL plus the filename. The text under the image shows which path it took (`via resource` or `via computed`) and which renderer produced it (`build` or `editor`). Only V1 is tested, because V1 has the config the skill recommends.
+
+Steps on the home page:
+
+1. Open it in the Visual Editor and don't touch anything. Does the cover show? Note the `src`, `via` and `renderer` text.
+2. Click the component and change `cover` to `other.jpg` in its panel, then close the panel. Does the flipped image show? Note the `src`, `via` and `renderer` text, and the stored value in the panel. Don't save. Discard the change afterwards.
+3. Upload a new image to `cover` from this panel. Where does the upload go, and what value is stored? Discard afterwards.
+
+| Step | Cover shows? | `src` | `via` | `renderer` | Stored value |
+| --- | --- | --- | --- | --- | --- |
+| 1. Load | | | | | — |
+| 2. Choose `other.jpg` | | | | | |
+| 3. Upload | | | | | |
+
+What the results mean:
+
+- Step 2 shows the flipped image with `via computed`, and the stored value is `other.jpg`: a component region works off-page. The editor can't see bundle files, so the partial has to build the URL itself.
+- `via resource` with `renderer editor`: the editor can see bundle files, so a plain `.Resources.Get` partial works.
+- Stored value `v1/other.jpg`, or anything other than a bare filename: the panel saves relative to the page being edited, as the image region did. The post's own page would break after a save.
+- Cover blank, or a `Failed to render Hugo component` error: the lookup by title failed in the editor's Hugo.
