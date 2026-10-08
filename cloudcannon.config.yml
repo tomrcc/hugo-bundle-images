@@ -80,6 +80,23 @@ collections_config:
             static: content/blog/v4/
             uploads_use_relative_path: true
 
+  blog_v5:
+    path: content/blog
+    glob:
+      - v5/index.md
+    url: /blog/[full_slug]/
+    name: "V5: static = this bundle, relative off"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            static: content/blog/v5/
+            uploads_use_relative_path: false
+
 _inputs:
   control:
     type: image

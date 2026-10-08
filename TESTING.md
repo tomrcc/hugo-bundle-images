@@ -96,10 +96,12 @@ Steps:
 
 | Step | Shows? | `src` | Picker folder | Stored value |
 | --- | --- | --- | --- | --- |
-| 1. Control upload | | | — | |
-| 2. V4 load | | | — | `cover.jpg` |
-| 3. V4 choose `other.jpg` | | | | |
-| 4. V4 upload | | | | |
+| 1. Control upload | Yes, until a refresh without saving | `/images/screenshot-2026-06-05-at-12-37-42-pm.png` | — | |
+| 2. V4 load | Yes | `cover.jpg` | — | `cover.jpg` |
+| 3. V4 choose `other.jpg` | Yes | `other.jpg` | Shown as `content/blog/v4`, but empty; had to go back several levels to find `other.jpg` | |
+| 4. V4 upload | No | `../../../pexels-enzo-elgalgo.jpg` | — | `../../../pexels-enzo-elgalgo.jpg`; file landed beside `cover.jpg` |
+
+Step 4 note: the picker path is shown relative to `static`, so `content/blog/v4` there is probably `content/blog/v4/content/blog/v4/`. `../../../` is the relative path from that doubled folder back to the real one. Because the stored value is wrong, V4 can't answer the preview question.
 
 What the results mean:
 
@@ -107,3 +109,27 @@ What the results mean:
 - Step 1 previews and step 4 doesn't: `static` mapping doesn't help bundle files. Compare the two `src` values to see what CloudCannon does differently for `static/`.
 - Step 1 doesn't preview: no upload previews before a rebuild, whatever the paths.
 - Step 2 or 3 broken: a full-path `static` breaks existing images. Compare with V1, where both work.
+
+## Static path variant, relative off (V5)
+
+Question: same as V4, with values stored the way the Control box stores them.
+
+V5 is V4 with `uploads_use_relative_path: false` and `cover: /cover.jpg`. The Control input works the same way (`static: static`, relative off, `/images/…`). Hugo's `.Resources.Get` finds `/cover.jpg` in the bundle, so the build is unchanged.
+
+Steps, on V5's page (`/blog/v5/`). Copy each `src` straight away, before any refresh:
+
+5. **Load.** Reload without touching anything. Does the cover show? Copy its `src`.
+6. **Choose.** Click the cover. Where does the picker open? Choose `other.jpg`. Does it show? Copy its `src` and the stored value. Discard.
+7. **Upload.** Click the cover and upload a new image. Does it show straight away? Copy its `src` and the stored value, and note where the file went. Discard.
+
+| Step | Shows? | `src` | Picker folder | Stored value |
+| --- | --- | --- | --- | --- |
+| 5. V5 load | | | — | `/cover.jpg` |
+| 6. V5 choose `other.jpg` | | | | |
+| 7. V5 upload | | | | |
+
+What the results mean:
+
+- Step 7 previews with a `/…` `src`: a correct `static` mapping lets unbuilt bundle uploads preview, as it does for Control. Only placeholder support in `static` is missing (UPSTREAM-DRAFTS #20b).
+- Step 5 broken: the editor doesn't map `/cover.jpg` back to the post's folder for files that are already built. Existing covers would break on load.
+- Step 6 picker opens in an empty folder, or a stored value other than `/other.jpg`: the `static`/`uploads` doubling from V4 happens with relative paths off too.
