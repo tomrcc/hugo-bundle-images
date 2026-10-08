@@ -1,0 +1,3 @@
+---
+title: Bundle images test
+---

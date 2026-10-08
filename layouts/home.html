@@ -1,0 +1,9 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+<ul>
+  <li><a href="/blog/">Blog list</a></li>
+  {{- range (site.GetPage "/blog").Pages.ByTitle }}
+  <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+  {{- end }}
+</ul>
+{{ end }}

@@ -1,0 +1,72 @@
+# Bundle image regions test. The three blog collections each hold one post and
+# differ only in the cover input's paths. See TESTING.md.
+
+collections_config:
+  pages:
+    path: content
+    glob:
+      - _index.md
+      - blog/_index.md
+    url: /[full_slug]/
+    name: Pages
+    icon: wysiwyg
+    disable_add: true
+
+  blog_v1:
+    path: content/blog
+    glob:
+      - v1/index.md
+    url: /blog/[full_slug]/
+    name: 'V1: static ""'
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            static: ""
+            uploads_use_relative_path: true
+
+  blog_v2:
+    path: content/blog
+    glob:
+      - v2/index.md
+    url: /blog/[full_slug]/
+    name: "V2: static = bundle, relative on"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            static: content/blog/[full_slug]/
+            uploads_use_relative_path: true
+
+  blog_v3:
+    path: content/blog
+    glob:
+      - v3/index.md
+    url: /blog/[full_slug]/
+    name: "V3: static = bundle, relative off"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            static: content/blog/[full_slug]/
+            uploads_use_relative_path: false
+
+_inputs:
+  control:
+    type: image
+    options:
+      paths:
+        uploads: static/images
+        static: static

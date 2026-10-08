@@ -1,0 +1,14 @@
+{
+  "ssg": "hugo",
+  "mode": "hosted",
+  "build": {
+    "install_command": "",
+    "build_command": "hugo mod vendor && hugo",
+    "output_path": "public",
+    "hugo_version": "0.166.0",
+    "environment_variables": [
+      { "key": "HUGO_CACHEDIR", "value": "/usr/local/__site/src/.hugo_cache/" }
+    ],
+    "preserved_paths": "resources/,.hugo_cache/"
+  }
+}

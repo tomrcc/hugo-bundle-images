@@ -1,0 +1,20 @@
+{{ define "main" }}
+<h1>{{ .Title }}</h1>
+
+<section class="box">
+  <h2>Control: static/ image, root-relative value</h2>
+  <img data-editable="image" data-prop-src="control" src="{{ .Params.control }}" alt="Control">
+  <p>Stored value <code>{{ .Params.control }}</code></p>
+</section>
+
+{{- range .Pages.ByTitle }}
+{{- $file := printf "/content/%s" .File.Path }}
+{{- $src := "" }}{{ with .Resources.Get .Params.cover }}{{ $src = .RelPermalink }}{{ end }}
+<section class="box">
+  <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+  <p>Cover: bundle image on the list page</p>
+  <img data-editable="image" data-prop-src="@file[{{ $file }}].cover" src="{{ $src }}" alt="{{ .Title }} cover">
+  <p>Stored value <code>{{ .Params.cover }}</code> · build <code>src</code> <code>{{ $src }}</code> · bound to <code>@file[{{ $file }}].cover</code></p>
+</section>
+{{- end }}
+{{ end }}
