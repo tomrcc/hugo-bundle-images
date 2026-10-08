@@ -68,9 +68,11 @@ Steps on the home page:
 
 | Step | Cover shows? | `src` | `via` | `renderer` | Stored value |
 | --- | --- | --- | --- | --- | --- |
-| 1. Load | | | | | — |
-| 2. Choose `other.jpg` | | | | | |
-| 3. Upload | | | | | |
+| 1. Load | Yes | | | | — |
+| 2. Choose `other.jpg` | Yes | `/blog/v1/other.jpg` | `computed` | `editor` | `other.jpg` |
+| 3. Upload | No | `/blog/v1/send-it-ai.png` | `computed` | `editor` | `send-it-ai.png` (file written to `content/blog/v1/`) |
+
+Step 3 note: the value and file location are correct. The preview breaks because `/blog/v1/send-it-ai.png` only exists in the built site after the next build. After save and rebuild it shows on both V1's page and the home page. An upload through the image region on V1's own page doesn't preview before a rebuild either, so the gap isn't specific to the component.
 
 What the results mean:
 
@@ -78,3 +80,30 @@ What the results mean:
 - `via resource` with `renderer editor`: the editor can see bundle files, so a plain `.Resources.Get` partial works.
 - Stored value `v1/other.jpg`, or anything other than a bare filename: the panel saves relative to the page being edited, as the image region did. The post's own page would break after a save.
 - Cover blank, or a `Failed to render Hugo component` error: the lookup by title failed in the editor's Hugo.
+
+## Static path variant (V4)
+
+Question: does a fresh bundle upload preview before a rebuild if `paths.static` points at the post's folder?
+
+V2 and V3 couldn't answer this, because `static: content/blog/[full_slug]/` kept `[full_slug]` literal. V4 writes the folder out in full (`static: content/blog/v4/`) and is otherwise the same as V1. A hard-coded per-post path isn't usable on a real site; this only tests whether the mapping helps.
+
+Steps:
+
+1. **Control upload (baseline).** On V4's page, upload a new image to the Control box. Does it show straight away? Inspect the `<img>` and copy its `src`. Discard.
+2. **V4 load.** Reload V4's page without touching anything. Does the cover show? Copy its `src`.
+3. **V4 choose.** Click the cover. Which folder does the picker open in? Choose `other.jpg`. Does it show? Copy its `src` and the stored value. Discard.
+4. **V4 upload.** Click the cover and upload a new image. Does it show straight away? Copy its `src` and the stored value, and note which folder the file was written to. Discard.
+
+| Step | Shows? | `src` | Picker folder | Stored value |
+| --- | --- | --- | --- | --- |
+| 1. Control upload | | | — | |
+| 2. V4 load | | | — | `cover.jpg` |
+| 3. V4 choose `other.jpg` | | | | |
+| 4. V4 upload | | | | |
+
+What the results mean:
+
+- Step 1 previews and step 4 previews: a correct `static` mapping lets unbuilt uploads preview. Only the placeholder support is missing, which strengthens UPSTREAM-DRAFTS #20b.
+- Step 1 previews and step 4 doesn't: `static` mapping doesn't help bundle files. Compare the two `src` values to see what CloudCannon does differently for `static/`.
+- Step 1 doesn't preview: no upload previews before a rebuild, whatever the paths.
+- Step 2 or 3 broken: a full-path `static` breaks existing images. Compare with V1, where both work.
