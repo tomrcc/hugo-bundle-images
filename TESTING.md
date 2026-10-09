@@ -124,12 +124,58 @@ Steps, on V5's page (`/blog/v5/`). Copy each `src` straight away, before any ref
 
 | Step | Shows? | `src` | Picker folder | Stored value |
 | --- | --- | --- | --- | --- |
-| 5. V5 load | | | — | `/cover.jpg` |
-| 6. V5 choose `other.jpg` | | | | |
-| 7. V5 upload | | | | |
+| 5. V5 load | No | `/cover.jpg` | — | `/cover.jpg` |
+| 6. V5 choose `other.jpg` | Yes | `https://app.cloudcannon.com/api/v0/sites/<site>/files/content%2Fblog%2Fv5%2Fother.jpg?…` | The bundle folder (no path shown) | `/other.jpg` |
+| 7. V5 upload | Yes, straight away | `https://app.cloudcannon.com/api/v0/editing_session_files/<id>/raw?…` | — | `/pexels-karolina-grabowska.jpg`; save modal path `/content/blog/v5/` |
+
+Step 5–7 note: the image region calls `getPreviewUrl(value, inputConfig)` on load and on change (`editable-regions/nodes/editable-image.ts:136`). On load it returned the raw value. After a change it used `static` to resolve the value to the repo file (or the unsaved upload) through CloudCannon's API. So a correct `static` does make bundle edits and uploads preview, but the unchanged value on load still breaks.
 
 What the results mean:
 
 - Step 7 previews with a `/…` `src`: a correct `static` mapping lets unbuilt bundle uploads preview, as it does for Control. Only placeholder support in `static` is missing (UPSTREAM-DRAFTS #20b).
 - Step 5 broken: the editor doesn't map `/cover.jpg` back to the post's folder for files that are already built. Existing covers would break on load.
 - Step 6 picker opens in an empty folder, or a stored value other than `/other.jpg`: the `static`/`uploads` doubling from V4 happens with relative paths off too.
+
+## V3 rerun against V5 (placeholder in `static`)
+
+V3 is V5 with `static: content/blog/[full_slug]/` instead of `content/blog/v5/`.
+
+| Step | Shows? | `src` | Picker folder | Stored value |
+| --- | --- | --- | --- | --- |
+| 9. V3 choose `other.jpg` | Can't choose | `/cover.jpg` (unchanged) | Unlabelled; one level up is the literal `content/blog/[full_slug]`. After clearing the image it opens at `content/blog/v3` (empty), whose parents are `content/blog/[full_slug]/content/blog` | — |
+| 10. V3 upload | Yes, straight away | `https://app.cloudcannon.com/api/v0/editing_session_files/<id>/raw?…` | — | `/content/blog/v3/pexels-polina-tankilevitch.jpg` (save modal path the same) |
+
+Confirms `static` doesn't fill in `[full_slug]`: the picker shows it literally, and the upload stores the full repo path where V5 stored `/pexels-….jpg`. Hugo's `.Resources.Get` can't find that value.
+
+The upload still previewed, though `static` didn't match. Uploads previewed in every relative-off variant (Control, V3, V5) and in no relative-on variant (V1, V4). Upload preview may depend on the value being root-style rather than on `static`.
+
+## V5 on the blog list
+
+| Step | Shows? | Stored value |
+| --- | --- | --- |
+| 8. Blog list, V5 card, choose `other.jpg` | Yes | `/other.jpg` |
+
+With no placeholder and relative paths off, an image region bound with `@file` on another page edits a bundle image correctly. Only the image on load breaks, as on V5's own page.
+
+## Empty uploads variant (V6)
+
+Question: with `uploads: ""` and relative paths on, does CloudCannon upload into the folder of the file being edited?
+
+V6 is V1 with `uploads: ""` instead of `content/blog/[full_slug]/`. The docs say `uploads_use_relative_path` makes the stored value relative to the file being edited, and that `uploads` defaults to `uploads`; they don't say what an empty `uploads` means.
+
+Steps. Copy each value straight away, then discard:
+
+11. **Upload on V6's own page (`/blog/v6/`).** Click the cover and upload a new image. Where does the picker open? What's the stored value? Which folder does the save modal show the file going to?
+12. **Upload from the blog list (`/blog/`).** Click V6's card cover (it's broken on load, as all bundle covers are there) and upload a new image. Same three questions.
+
+| Step | Picker folder | Stored value | File saved to |
+| --- | --- | --- | --- |
+| 11. V6 own page | | | |
+| 12. V6 from blog list | | | |
+
+What the results mean:
+
+- Step 11 saves to `content/blog/v6/` with a bare filename: an empty `uploads` means the file's own folder. Same result as V1 with no placeholder.
+- Step 11 saves to `uploads/` or the repo root, with a `../`-style value: an empty `uploads` falls back to a default. Hugo can't find the value.
+- Step 12 saves to `content/blog/v6/` with a bare filename: "the file being edited" is the post, so V6 also fixes uploads from other pages (#20a).
+- Step 12 saves to `content/blog/` or elsewhere: it uses the page being edited, as #20a describes.

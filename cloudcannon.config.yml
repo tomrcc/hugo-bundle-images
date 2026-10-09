@@ -97,6 +97,23 @@ collections_config:
             static: content/blog/v5/
             uploads_use_relative_path: false
 
+  blog_v6:
+    path: content/blog
+    glob:
+      - v6/index.md
+    url: /blog/[full_slug]/
+    name: "V6: uploads and static empty, relative on"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: ""
+            static: ""
+            uploads_use_relative_path: true
+
 _inputs:
   control:
     type: image
