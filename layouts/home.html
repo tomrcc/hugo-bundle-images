@@ -10,6 +10,7 @@
 {{- with site.GetPage "/blog/v1" }}
 <section class="box">
   <h2>Component region: V1 cover off its own page</h2>
+  <p>A component region bound to V1, with no image region inside. The partial builds the URL from the post's permalink, because the editor's Hugo can't see bundle files. Choosing an image updates it live; a new upload shows after the next build.</p>
   <div data-editable="component" data-component="bundle-cover" data-prop="@file[/content/{{ .File.Path }}]">
     {{- partial "bundle-cover" .Params -}}
   </div>

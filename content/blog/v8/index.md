@@ -1,7 +1,11 @@
 ---
-title: 'V8: uploads = bundle, no static, relative path on'
+title: 'V8: static left out, relative on'
 date: "2026-10-01T09:00:00Z"
 control: /images/control.jpg
 cover: cover.jpg
 ---
-Same as V1, except `static` is left out instead of empty.
+**Tests:** whether leaving `static` out differs from `static: ""` (V1).
+
+**Result:**
+
+- Same as V1 in every step.

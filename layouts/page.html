@@ -1,5 +1,15 @@
 {{ define "main" }}
 <h1>{{ .Title }}</h1>
+
+<section class="box">
+  <h2>This post's <code>cover</code> input paths</h2>
+  {{- $cfg := os.ReadFile "cloudcannon.config.yml" | transform.Unmarshal }}
+  {{- with index $cfg.collections_config (printf "blog_%s" (path.Base .File.Dir)) }}
+  <pre>{{ transform.Remarshal "yaml" ._inputs.cover.options.paths }}</pre>
+  {{- end }}
+  <p>Read from <code>cloudcannon.config.yml</code> at build time. Keys not listed are left out.</p>
+</section>
+
 {{ .Content }}
 
 <section class="box">

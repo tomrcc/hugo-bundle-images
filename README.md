@@ -1,45 +1,61 @@
-# Hugo bundle images test
+# Hugo bundle images in CloudCannon
 
-How CloudCannon image editing behaves for Hugo page-bundle images (`content/blog/<post>/cover.jpg`, read with `.Resources.Get`). Raw results and steps are in [TESTING.md](TESTING.md).
+How CloudCannon image inputs and image regions handle Hugo page-bundle images: `content/blog/<post>/cover.jpg`, read with `.Resources.Get`. Each post `/blog/vN/` is its own collection, so each has its own `cover` input `paths`. Tested on a hosted site, 2026-10-08/09.
 
-## Reading the site
+- [TESTING.md](TESTING.md): how to run each check, and the raw values.
 
-- **Each post is one variant.** `/blog/vN/` is in its own collection, so each has its own `cover` input `paths`. The variants are listed in `cloudcannon.config.yml` and [TESTING.md § Path combinations](TESTING.md#path-combinations-v1v11).
-- **Post page:** two boxes, each an image region.
-  - **Control:** a `static/` image. If it's broken, the page is broken; ignore its covers.
-  - **Cover:** the post's bundle image.
-  
-  The text under each image shows the stored value and the `src` Hugo built.
-- **Blog list (`/blog/`):** every post's cover again, as an image region bound with `@file`. This tests editing from another page.
-- **Home page:** V1's cover in a component region (`layouts/partials/bundle-cover.html`), with no image region inside. The text under it shows:
-  - `src`: the URL the partial built.
-  - `via`: `resource` (`.Resources.Get` found the file) or `computed` (post URL + filename).
-  - `renderer`: `build` or `editor`.
-- **What to record in the editor:**
-  - **Load:** the `<img>` `src` before touching anything.
-  - **Choose:** the folder CloudCannon's image browser opens in, plus the stored value and `src` after choosing.
-  - **Upload:** the stored value and the folder shown in the save modal.
+## The `static` problem
+
+A bundle's folder differs per post, so `paths.static` would need a placeholder: `static: content/blog/[full_slug]/`. `uploads` fills in placeholders, but `static` doesn't; `[full_slug]` stays literal.
+
+V3 and V5 differ only in that placeholder:
+
+| | `static` | Choose existing | Upload stores | Upload previews |
+| --- | --- | --- | --- | --- |
+| V3 | `content/blog/[full_slug]/` | ❌ browser opens under a literal `[full_slug]` folder | `/content/blog/v3/x.jpg` (Hugo can't find it) | ✅ |
+| V5 | `content/blog/v5/` | ✅ stores `/other.jpg` | `/x.jpg` (`.Resources.Get "/x.jpg"` finds it) | ✅ |
+
+Filling in placeholders would make V3 behave like V5. Two more things stand between that and fully working bundle images:
+
+1. **First load.** An image region sets `src` to the raw stored value on load (`editable-regions` `nodes/editable-image.ts:136`), so V5's `/cover.jpg` breaks until it's edited. After an edit, the same `getPreviewUrl` call resolves through `static` to a CloudCannon file URL.
+2. **Other pages.** Placeholders are filled from the page being edited, not the `@file` target. Uploading V10's cover from the blog list saves to `content/blog/blog/`.
+
+## Results
+
+`uploads` is `content/blog/[full_slug]/` unless shown otherwise. "Shows later" means the upload saved to the right folder with a value Hugo can read, but only appears on the page after the next build (confirmed on V1).
+
+| Post | `static` | Relative | Load | Choose | Upload |
+| --- | --- | --- | --- | --- | --- |
+| V1 | `""` | on | ✅ own page | ✅ | ✅ shows later |
+| V2 | `content/blog/[full_slug]/` | on | ✅ | ❌ empty folder | ✅ shows later |
+| V3 | `content/blog/[full_slug]/` | off | ❌ | ❌ | ❌ full repo path |
+| V4 | `content/blog/v4/` | on | ✅ | ⚠️ starts in empty folder | ❌ `../../../x.jpg` |
+| V5 | `content/blog/v5/` | off | ❌ | ✅ | ✅ previews |
+| V6 | `""`, `uploads: ""` | on | — | ✅ | ❌ repo root |
+| V7 | left out, `uploads` left out | on | ✅ | ✅ | ❌ `/uploads/` |
+| V8 | left out | on | ✅ own page | ✅ | ✅ shows later |
+| V9 | left out | off | ✅ | ❌ full repo path | ❌ full repo path |
+| V10 | `content` | off | ✅ any page | ✅ any page | ✅ previews (own page only) |
+| V11 | `content` | on | ✅ | ⚠️ starts in empty folder | ❌ `../../../blog/v11/x.jpg` |
 
 ## Findings
 
-- **Image regions use the raw stored value when the page loads.** The value only shows if it already works as a URL from the current page.
-- **After a change, root-style values (`/…`) resolve through `static`** to a CloudCannon file URL, so a choose or an upload previews straight away. Relative values don't, so a new upload only shows after the next build.
-- **`uploads_use_relative_path` changes how the value is written, not where the file goes.**
+- **On load, an image region shows the raw stored value.** It only shows if that value already works as a URL from the current page. `cover.jpg` works only on the post's own page.
+- **`uploads_use_relative_path` decides how the value is written, not where the file goes.**
   - On: relative to the edited file (`cover.jpg`).
   - Off: relative to `static` (`/cover.jpg`).
-- **`static` doesn't fill in placeholders.** `[full_slug]` stays literal, so the image browser opens in a folder that doesn't exist.
-- **`uploads: ""` means the repo root.**
-- **`.Resources.Get` accepts a leading slash.** `"/cover.jpg"` finds the bundle's `cover.jpg`.
-- **The editor's Hugo can't see bundle files.** A component partial has to build the URL itself: the post's `.RelPermalink` plus the filename.
+- **`uploads` decides where the file goes.** `""` is the repo root; left out, it's `uploads/`.
+- **Relative paths on need `static` to be `""` or left out.** Any other value opens the image browser at `static` + `uploads`, a folder that doesn't exist (V2, V4, V11). V4 and V11 also store broken `../` values.
+- **Only root-style values (`/…`) preview after a change,** and they do even when `static` is wrong (V3, V9). Relative values show only after the next build.
+- **V10 is a workaround that works today.** It stores the image's site URL. It needs a template that removes the post's URL before `.Resources.Get`, and a URL that matches the folder.
+- **The editor's Hugo can't see bundle files.** A component region can still show a bundle image on another page by building the URL from the post's `.RelPermalink` (home page).
 
-| Setup | Load | Choose | Upload preview | Other pages |
-| --- | --- | --- | --- | --- |
-| V1: `static: ""`, relative on (`cover.jpg`) | Own page only | ✅ | After rebuild | Component region only |
-| V5: `static` = post folder hard-coded, relative off (`/cover.jpg`) | ❌ | ✅ | ✅ | ✅ choose (load ❌) |
-| **V10: `static: content`, relative off (`/blog/v10/cover.jpg`)** | ✅ | ✅ | ✅ | to confirm |
+## Reading the site
 
-**V10** stores the image's site URL. It needs no placeholder in `static`.
+- **Post page:** the cover input's `paths` (read from `cloudcannon.config.yml`), what it tests, and the result. Below that:
+  - **Control:** a `static/` image. If it's broken, the page is broken; ignore its cover.
+  - **Cover:** the bundle image, in an image region.
+- **Blog list:** every cover again, in image regions bound with `@file`.
+- **Home page:** V1's cover in a component region (`layouts/partials/bundle-cover.html`). The text under it shows whether the `src` came from `.Resources.Get` or was built from the permalink.
 
-Its costs:
-- The template strips the post's own URL from the value before `.Resources.Get` (see `layouts/page.html`).
-- Values break if a post's URL stops matching its folder (permalinks, slug changes).
+All files open in the Visual Editor by default.

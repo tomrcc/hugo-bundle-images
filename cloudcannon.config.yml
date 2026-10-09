@@ -22,7 +22,7 @@ collections_config:
     glob:
       - v1/index.md
     url: /blog/[full_slug]/
-    name: 'V1: static ""'
+    name: "V1: static empty, relative on (recommended)"
     icon: post_add
     disable_add: true
     _inputs:
@@ -39,7 +39,7 @@ collections_config:
     glob:
       - v2/index.md
     url: /blog/[full_slug]/
-    name: "V2: static = bundle, relative on"
+    name: "V2: static with placeholder, relative on"
     icon: post_add
     disable_add: true
     _inputs:
@@ -56,7 +56,7 @@ collections_config:
     glob:
       - v3/index.md
     url: /blog/[full_slug]/
-    name: "V3: static = bundle, relative off"
+    name: "V3: static with placeholder, relative off"
     icon: post_add
     disable_add: true
     _inputs:
@@ -73,7 +73,7 @@ collections_config:
     glob:
       - v4/index.md
     url: /blog/[full_slug]/
-    name: "V4: static = this bundle, no placeholder"
+    name: "V4: static is this post's folder, relative on"
     icon: post_add
     disable_add: true
     _inputs:
@@ -90,7 +90,7 @@ collections_config:
     glob:
       - v5/index.md
     url: /blog/[full_slug]/
-    name: "V5: static = this bundle, relative off"
+    name: "V5: static is this post's folder, relative off"
     icon: post_add
     disable_add: true
     _inputs:
@@ -124,7 +124,7 @@ collections_config:
     glob:
       - v7/index.md
     url: /blog/[full_slug]/
-    name: "V7: no uploads or static, relative on"
+    name: "V7: uploads and static left out, relative on"
     icon: post_add
     disable_add: true
     _inputs:
@@ -139,7 +139,7 @@ collections_config:
     glob:
       - v8/index.md
     url: /blog/[full_slug]/
-    name: "V8: uploads = bundle, no static, relative on"
+    name: "V8: static left out, relative on"
     icon: post_add
     disable_add: true
     _inputs:
@@ -155,7 +155,7 @@ collections_config:
     glob:
       - v9/index.md
     url: /blog/[full_slug]/
-    name: "V9: uploads = bundle, no static, relative off"
+    name: "V9: static left out, relative off"
     icon: post_add
     disable_add: true
     _inputs:
@@ -171,7 +171,7 @@ collections_config:
     glob:
       - v10/index.md
     url: /blog/[full_slug]/
-    name: "V10: static = content, relative off"
+    name: "V10: static is content/, relative off"
     icon: post_add
     disable_add: true
     _inputs:
@@ -188,7 +188,7 @@ collections_config:
     glob:
       - v11/index.md
     url: /blog/[full_slug]/
-    name: "V11: static = content, relative on"
+    name: "V11: static is content/, relative on"
     icon: post_add
     disable_add: true
     _inputs:
