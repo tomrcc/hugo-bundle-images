@@ -110,8 +110,6 @@ collections_config:
         type: image
         options:
           paths:
-            uploads: ""
-            static: ""
             uploads_use_relative_path: true
 
 _inputs:
