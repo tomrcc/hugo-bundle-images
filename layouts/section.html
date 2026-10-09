@@ -9,7 +9,8 @@
 
 {{- range .Pages.ByTitle }}
 {{- $file := printf "/content/%s" .File.Path }}
-{{- $src := "" }}{{ with .Resources.Get .Params.cover }}{{ $src = .RelPermalink }}{{ end }}
+{{- $name := strings.TrimPrefix .RelPermalink (.Params.cover | default "") }}{{/* V10 stores the site URL */}}
+{{- $src := "" }}{{ with .Resources.Get $name }}{{ $src = .RelPermalink }}{{ end }}
 <section class="box">
   <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
   <p>Cover: bundle image on the list page</p>

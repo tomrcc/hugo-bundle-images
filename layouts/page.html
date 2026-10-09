@@ -10,7 +10,8 @@
 
 <section class="box">
   <h2>Cover: bundle image on its own page</h2>
-  {{- $src := "" }}{{ with .Resources.Get .Params.cover }}{{ $src = .RelPermalink }}{{ end }}
+  {{- $name := strings.TrimPrefix .RelPermalink (.Params.cover | default "") }}{{/* V10 stores the site URL */}}
+{{- $src := "" }}{{ with .Resources.Get $name }}{{ $src = .RelPermalink }}{{ end }}
   <img data-editable="image" data-prop-src="cover" src="{{ $src }}" alt="Cover">
   <p>Stored value <code>{{ .Params.cover }}</code> · build <code>src</code> <code>{{ $src }}</code></p>
 </section>

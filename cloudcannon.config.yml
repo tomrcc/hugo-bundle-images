@@ -110,6 +110,89 @@ collections_config:
         type: image
         options:
           paths:
+            uploads: ""
+            static: ""
+            uploads_use_relative_path: true
+
+  blog_v7:
+    path: content/blog
+    glob:
+      - v7/index.md
+    url: /blog/[full_slug]/
+    name: "V7: no uploads or static, relative on"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads_use_relative_path: true
+
+  blog_v8:
+    path: content/blog
+    glob:
+      - v8/index.md
+    url: /blog/[full_slug]/
+    name: "V8: uploads = bundle, no static, relative on"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            uploads_use_relative_path: true
+
+  blog_v9:
+    path: content/blog
+    glob:
+      - v9/index.md
+    url: /blog/[full_slug]/
+    name: "V9: uploads = bundle, no static, relative off"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            uploads_use_relative_path: false
+
+  blog_v10:
+    path: content/blog
+    glob:
+      - v10/index.md
+    url: /blog/[full_slug]/
+    name: "V10: static = content, relative off"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            static: content
+            uploads_use_relative_path: false
+
+  blog_v11:
+    path: content/blog
+    glob:
+      - v11/index.md
+    url: /blog/[full_slug]/
+    name: "V11: static = content, relative on"
+    icon: post_add
+    disable_add: true
+    _inputs:
+      cover:
+        type: image
+        options:
+          paths:
+            uploads: content/blog/[full_slug]/
+            static: content
             uploads_use_relative_path: true
 
 _inputs:

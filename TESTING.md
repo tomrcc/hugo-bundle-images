@@ -161,7 +161,7 @@ With no placeholder and relative paths off, an image region bound with `@file` o
 
 Question: with `uploads: ""` and relative paths on, does CloudCannon upload into the folder of the file being edited?
 
-V6 is V1 with `uploads: ""` instead of `content/blog/[full_slug]/`. The docs say `uploads_use_relative_path` makes the stored value relative to the file being edited, and that `uploads` defaults to `uploads`; they don't say what an empty `uploads` means.
+V6 is V1 with `uploads: ""` instead of `content/blog/[full_slug]/`. (Commit `23c9e20` briefly removed V6's `uploads` and `static`; that version is now V7, and V6 is back to empty strings.) The docs say `uploads_use_relative_path` makes the stored value relative to the file being edited, and that `uploads` defaults to `uploads`; they don't say what an empty `uploads` means.
 
 Steps. Copy each value straight away, then discard:
 
@@ -170,7 +170,7 @@ Steps. Copy each value straight away, then discard:
 
 | Step | Picker folder | Stored value | File saved to |
 | --- | --- | --- | --- |
-| 11. V6 own page | | | |
+| 11. V6 own page | Choosing: the bundle folder, `other.jpg` renders | Upload: `../../../pexels-edmond-dantes.jpg` (`src` the same, broken) | Repo root `/` |
 | 12. V6 from blog list | | | |
 
 What the results mean:
@@ -179,3 +179,55 @@ What the results mean:
 - Step 11 saves to `uploads/` or the repo root, with a `../`-style value: an empty `uploads` falls back to a default. Hugo can't find the value.
 - Step 12 saves to `content/blog/v6/` with a bare filename: "the file being edited" is the post, so V6 also fixes uploads from other pages (#20a).
 - Step 12 saves to `content/blog/` or elsewhere: it uses the page being edited, as #20a describes.
+
+## Path combinations (V1–V11)
+
+Every variant uses `uploads: content/blog/[full_slug]/` unless the table says otherwise. Each post starts with `cover.jpg` and `other.jpg` in its folder.
+
+| Post | `uploads` | `static` | Relative | Starting value |
+| --- | --- | --- | --- | --- |
+| V1 | bundle | `""` | on | `cover.jpg` |
+| V2 | bundle | `content/blog/[full_slug]/` | on | `cover.jpg` |
+| V3 | bundle | `content/blog/[full_slug]/` | off | `/cover.jpg` |
+| V4 | bundle | `content/blog/v4/` | on | `cover.jpg` |
+| V5 | bundle | `content/blog/v5/` | off | `/cover.jpg` |
+| V6 | `""` | `""` | on | `cover.jpg` |
+| V7 | (left out) | (left out) | on | `cover.jpg` |
+| V8 | bundle | (left out) | on | `cover.jpg` |
+| V9 | bundle | (left out) | off | `cover.jpg` |
+| V10 | bundle | `content` | off | `/blog/v10/cover.jpg` |
+| V11 | bundle | `content` | on | `cover.jpg` |
+
+V10 stores the image's site URL. The page and section templates strip the post's own URL from the front of the value before `.Resources.Get`, so V10 builds; no other variant's value starts with its post's URL.
+
+Steps for each post, on its own page. Copy each value straight away, then discard:
+
+- **Load.** Does the cover show? Copy its `src`.
+- **Choose.** Click the cover. Which folder does CloudCannon's image browser open in, and are `cover.jpg` and `other.jpg` there? Choose `other.jpg`. Does it show? Copy its `src` and the stored value.
+- **Upload.** Click the cover and upload a new image. Does it show straight away? Copy the stored value and the folder in the save modal.
+
+For any variant whose upload lands in its own folder with a value Hugo can use, repeat Choose and Upload from the blog list.
+
+| Post | Load: shows? (`src`) | Choose: browser folder | Choose: shows? (value) | Upload: shows? | Upload: value | Upload: saved to |
+| --- | --- | --- | --- | --- | --- | --- |
+| V1 | Yes (`cover.jpg`) | The bundle | Yes (`other.jpg`) | No | `send-it-ai.png` | `content/blog/v1/` |
+| V2 | | | | | | |
+| V3 | No (`/cover.jpg`) | Literal `content/blog/[full_slug]`, empty | Can't choose | Yes | `/content/blog/v3/pexels-polina-tankilevitch.jpg` | `content/blog/v3/` |
+| V4 | Yes (`cover.jpg`) | Shown as `content/blog/v4`, empty | Yes (`other.jpg`) | No | `../../../pexels-enzo-elgalgo.jpg` | `content/blog/v4/` |
+| V5 | No (`/cover.jpg`) | The bundle | Yes (`/other.jpg`, files API `src`) | Yes | `/pexels-karolina-grabowska.jpg` | `content/blog/v5/` |
+| V6 | | The bundle | Yes | No | `../../../pexels-edmond-dantes.jpg` | Repo root |
+| V7 | | | | | | |
+| V8 | | | | | | |
+| V9 | | | | | | |
+| V10 | | | | | | |
+| V11 | | | | | | |
+
+V2 was tested on 2026-10-08, but those results weren't recorded here; rerun it with the rest.
+
+What each new variant answers:
+
+- **V7:** do left-out keys behave differently from empty strings (V6)? The docs example sets only `uploads_use_relative_path`.
+- **V8:** does a left-out `static` behave differently from `static: ""` (V1)?
+- **V9:** what an absolute value looks like with no `static` (probably `/content/blog/v9/…`).
+- **V10:** with `static: content`, a root-style value is the image's site URL, so it might work on load on any page, and preview after a change or upload, with no placeholder in `static`. The cost is a template that strips the post URL, and values that break if the post's URL stops matching its folder.
+- **V11:** the same `static` with relative paths on. Expected to match V1.
