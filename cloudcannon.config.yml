@@ -1,5 +1,10 @@
 # Bundle image regions test. The blog collections each hold one post and
-# differ only in the cover input's paths. See TESTING.md.
+# differ only in the cover input's paths. See README.md.
+
+_enabled_editors:
+  - visual
+  - content
+  - data
 
 collections_config:
   pages:

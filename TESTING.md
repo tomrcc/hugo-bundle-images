@@ -219,7 +219,7 @@ For any variant whose upload lands in its own folder with a value Hugo can use, 
 | V7 | | | | | | |
 | V8 | | | | | | |
 | V9 | | | | | | |
-| V10 | | | | | | |
+| V10 | Yes (`/blog/v10/cover.jpg`) | | Yes | Yes (editing-session URL; breaks on refresh before saving, like Control) | `/blog/v10/pexels-ivan-samkov.jpg` | `content/blog/v10/` |
 | V11 | | | | | | |
 
 V2 was tested on 2026-10-08, but those results weren't recorded here; rerun it with the rest.
@@ -231,3 +231,13 @@ What each new variant answers:
 - **V9:** what an absolute value looks like with no `static` (probably `/content/blog/v9/…`).
 - **V10:** with `static: content`, a root-style value is the image's site URL, so it might work on load on any page, and preview after a change or upload, with no placeholder in `static`. The cost is a template that strips the post URL, and values that break if the post's URL stops matching its folder.
 - **V11:** the same `static` with relative paths on. Expected to match V1.
+
+### V10 from the blog list
+
+| Step | Shows? | `src` | Stored value |
+| --- | --- | --- | --- |
+| Load | Yes | `/blog/v10/cover.jpg` | `/blog/v10/cover.jpg` |
+| Choose `other.jpg` | Yes | `https://app.cloudcannon.com/api/v0/sites/<site>/files/content%2Fblog%2Fv10%2Fother.jpg?…` | `/blog/v10/other.jpg` |
+| Upload | Yes | `https://app.cloudcannon.com/api/v0/editing_session_files/<id>/raw?…` | `/blog/blog/screenshot-2026-10-06-at-4-27-31-pm.png` |
+
+The upload value suggests `uploads: content/blog/[full_slug]/` filled `[full_slug]` from the blog list page (`blog`), not from V10 (UPSTREAM-DRAFTS #20a). The save modal confirms the file lands in `content/blog/blog/`, outside the bundle.

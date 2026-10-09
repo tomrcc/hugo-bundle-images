@@ -2,9 +2,9 @@
 <h1>{{ .Title }}</h1>
 <ul>
   <li><a href="/blog/">Blog list</a></li>
-  {{- range (site.GetPage "/blog").Pages.ByTitle }}
+  {{- range seq 99 }}{{ with site.GetPage (printf "/blog/v%d" .) }}{{/* numeric order: V2 before V10 */}}
   <li><a href="{{ .RelPermalink }}">{{ .Title }}</a></li>
-  {{- end }}
+  {{- end }}{{ end }}
 </ul>
 
 {{- with site.GetPage "/blog/v1" }}
